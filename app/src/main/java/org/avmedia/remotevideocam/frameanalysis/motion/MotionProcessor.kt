@@ -5,7 +5,7 @@ import android.opengl.GLES20
 import android.os.Handler
 import androidx.tracing.trace
 import org.avmedia.remotevideocam.camera.VideoProcessorImpl
-import org.opencv.android.OpenCVLoader
+import org.avmedia.remotevideocam.opengl.GlMixTextureDrawer
 import org.opencv.core.MatOfPoint
 import org.webrtc.GlRectDrawer
 import org.webrtc.GlTextureFrameBuffer
@@ -26,6 +26,10 @@ private val matToTextureTransform = Matrix().apply {
     preTranslate(-0.5f, -0.5f)
 }
 
+private val identityMatrix = FloatArray(16).apply {
+    android.opengl.Matrix.setIdentityM(this, 0)
+}
+
 private const val TAG = "MotionProcessor"
 
 /**
@@ -44,6 +48,7 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
     private val yuvConverter = YuvConverter()
     private val glDrawer = GlRectDrawer()
     private val motionDetector = MotionDetector()
+    private var textureDrawer: GlMixTextureDrawer? = null
 
     private var texId: Int? = null
     private var listener: Listener? = null
@@ -106,7 +111,12 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
 
         // TODO: optimize perf with a single framebuffer
         val frameBuffer = GlTextureFrameBuffer(GLES20.GL_RGBA)
-        renderToTexture(frameBuffer, textureFrame, texId)
+        frameBuffer.setSize(width, height)
+        if (false) {
+            renderToTexture(frameBuffer, textureFrame, texId)
+        } else {
+            renderToTexture2(frameBuffer, textureFrame, texId)
+        }
 
         return@trace TextureBufferImpl(
             width,
@@ -120,13 +130,39 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
         )
     }
 
+    private fun renderToTexture2(
+        frameBuffer: GlTextureFrameBuffer,
+        cameraTextureBuffer: TextureBuffer,
+        maskTexId: Int,
+    ) = trace("$TAG.renderToTexture2") {
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer.frameBufferId)
+
+        val cameraTransform =
+            RendererCommon.convertMatrixFromAndroidGraphicsMatrix(cameraTextureBuffer.transformMatrix)
+        val textureDrawer = this.textureDrawer ?: GlMixTextureDrawer().also {
+            it.init()
+            this.textureDrawer = it
+        }
+        textureDrawer.draw(
+            0,
+            0,
+            cameraTextureBuffer.width,
+            cameraTextureBuffer.height,
+            cameraTextureBuffer.textureId,
+            cameraTransform,
+            maskTexId,
+        )
+
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+
+        GLES20.glFlush()
+    }
+
     private fun renderToTexture(
         frameBuffer: GlTextureFrameBuffer,
         cameraTextureBuffer: TextureBuffer,
         texId: Int
     ) = trace("$TAG.renderToTexture") {
-        frameBuffer.setSize(cameraTextureBuffer.width, cameraTextureBuffer.height)
-
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer.frameBufferId)
 
         // Render camera frame
@@ -173,5 +209,7 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
         }
         glDrawer.release()
         yuvConverter.release()
+        textureDrawer?.release()
+        textureDrawer = null
     }
 }
