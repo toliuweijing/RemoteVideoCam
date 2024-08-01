@@ -17,6 +17,7 @@ import io.reactivex.functions.Predicate
 import org.avmedia.remotevideocam.camera.CameraToDisplayEventBus.emitEvent
 import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus.subscribe
 import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus.unsubscribe
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionNotificationController
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionProcessor
 import org.avmedia.remotevideocam.utils.ProgressEvents
 import org.avmedia.remotevideocam.utils.AndGate
@@ -69,6 +70,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
 
     private var videoCapturer: VideoCapturer? = null
     private var motionProcessor: MotionProcessor? = null
+    private var motionNotificationController: MotionNotificationController? = null
 
     // IVideoServer Interface
     override fun init(context: Context?) {
@@ -83,6 +85,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
 
         rootEglBase = EglBase.create()
         signalingHandler.handleControllerWebRtcEvents()
+        motionNotificationController = MotionNotificationController(context)
 
         createAppEventsSubscription(context)
     }
@@ -493,6 +496,6 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     }
 
     override fun onDetectionResult(detected: Boolean) {
-        Log.d(TAG, "Motion detection $detected.")
+        motionNotificationController?.showNotification()
     }
 }
