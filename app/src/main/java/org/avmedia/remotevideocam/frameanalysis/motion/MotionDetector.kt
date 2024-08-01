@@ -2,6 +2,7 @@ package org.avmedia.remotevideocam.frameanalysis.motion
 
 import android.opengl.GLES20
 import androidx.tracing.trace
+import org.avmedia.remotevideocam.frameanalysis.motion.backgroundsubtractor.FrameDiffSubtractor
 import org.opencv.android.OpenCVLoader
 import org.opencv.core.CvType
 import org.opencv.core.Mat
@@ -10,7 +11,6 @@ import org.opencv.core.Rect
 import org.opencv.core.Scalar
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
-import org.opencv.video.Video
 import org.webrtc.TextureBufferImpl
 import java.nio.ByteBuffer
 
@@ -28,7 +28,14 @@ private const val TAG = "MotionDetector"
 class MotionDetector {
 
     private val backgroundSubtractor by lazy {
-        Video.createBackgroundSubtractorMOG2()
+        FrameDiffSubtractor()
+    }
+
+    private val morphKernel by lazy {
+        Imgproc.getStructuringElement(
+            Imgproc.MORPH_ELLIPSE,
+            Size(3.0, 3.0),
+        )
     }
 
     private var byteBufferToTexture: ByteBuffer? = null
@@ -41,18 +48,14 @@ class MotionDetector {
 
     fun analyzeMotion(textureBuffer: TextureBufferImpl): List<MatOfPoint> =
         trace("$TAG.analyzeMotion") {
-            val i420Buffer = textureBuffer.toI420()
-            val yBuffer = i420Buffer.dataY
-            val imageMat = Mat(i420Buffer.height, i420Buffer.width, CvType.CV_8UC1, yBuffer)
-            val foregroundMat = Mat()
+            val foregroundMat =
+                backgroundSubtractor.apply(textureBuffer) ?: return@trace emptyList()
 
-            executeImageProcessing(imageMat, foregroundMat)
+            executeImageProcessing(foregroundMat)
 
             val contours = findContours(foregroundMat, MIN_AREA_THRESHOLD)
 
             foregroundMat.release()
-            imageMat.release()
-            i420Buffer.release()
 
             return@trace contours
         }
@@ -102,41 +105,42 @@ class MotionDetector {
         return byteBuffer
     }
 
-    private fun executeImageProcessing(image: Mat, foregroundMat: Mat) =
-        trace("$TAG.executeImageProcessing") {
-            backgroundSubtractor.apply(image, foregroundMat)
+    private fun executeImageProcessing(foregroundMat: Mat) =
+        trace("executeImageProcessing") {
+            trace("makeBinaryImage") {
+                // Create a binary image with a gray scale threshold.
+                Imgproc.threshold(
+                    foregroundMat,
+                    foregroundMat,
+                    GRAY_SCALE_THRESHOLD,
+                    255.0,
+                    Imgproc.THRESH_BINARY,
+                )
+            }
 
-            // Create a binary image with a gray scale threshold.
-            Imgproc.threshold(
-                foregroundMat,
-                foregroundMat,
-                GRAY_SCALE_THRESHOLD,
-                255.0,
-                Imgproc.THRESH_BINARY,
-            )
-
-            // Noise reduction on the binary image.
-            val kernel = Imgproc.getStructuringElement(
-                Imgproc.MORPH_ELLIPSE,
-                Size(3.0, 3.0),
-            )
-
-            /**
-             * Noise reduction choices
-             * 1. MORPH_OPEN to reduce random noises from the foreground.
-             * 2. MORPH_DILATE to enlarge the white region, reassembling parts back into a
-             * single object. Useful for objects with various backgrounds, like cars.
-             * 3. Optionally, MORPH_CLOSE to closing the small holes in the foreground objects. .
-             * See details https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html
-             */
-            Imgproc.morphologyEx(foregroundMat, foregroundMat, Imgproc.MORPH_OPEN, kernel)
-            Imgproc.morphologyEx(foregroundMat, foregroundMat, Imgproc.MORPH_DILATE, kernel)
+            trace("noiseReduction") {
+                /**
+                 * Noise reduction choices
+                 * 1. MORPH_OPEN to reduce random noises from the foreground.
+                 * 2. MORPH_DILATE to enlarge the white region, reassembling parts back into a
+                 * single object. Useful for objects with various backgrounds, like cars.
+                 * 3. Optionally, MORPH_CLOSE to closing the small holes in the foreground objects. .
+                 * See details https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html
+                 */
+                Imgproc.morphologyEx(foregroundMat, foregroundMat, Imgproc.MORPH_OPEN, morphKernel)
+                Imgproc.morphologyEx(
+                    foregroundMat,
+                    foregroundMat,
+                    Imgproc.MORPH_DILATE,
+                    morphKernel
+                )
+            }
         }
 
     private fun findContours(
         foregroundMat: Mat,
         minArea: Int = 0,
-    ): List<MatOfPoint> = trace("$TAG.findContours") {
+    ): List<MatOfPoint> = trace("findContours") {
         val contours = ArrayList<MatOfPoint>()
         Imgproc.findContours(
             foregroundMat,
