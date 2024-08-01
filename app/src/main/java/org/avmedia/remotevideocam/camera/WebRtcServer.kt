@@ -496,6 +496,8 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     }
 
     override fun onDetectionResult(detected: Boolean) {
-        motionNotificationController?.showNotification()
+        if (detected) {
+            motionNotificationController?.showNotification("Detected motion", "Detected motion")
+        }
     }
 }
