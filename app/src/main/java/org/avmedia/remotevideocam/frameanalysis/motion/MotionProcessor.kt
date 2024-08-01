@@ -172,5 +172,6 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
         }
         glDrawer.release()
         yuvConverter.release()
+        motionDetector.release()
     }
 }

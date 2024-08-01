@@ -151,4 +151,8 @@ class MotionDetector {
         )
         return@trace contours.filter { it.width() * it.height() >= minArea }
     }
+
+    fun release() {
+        backgroundSubtractor.release()
+    }
 }
