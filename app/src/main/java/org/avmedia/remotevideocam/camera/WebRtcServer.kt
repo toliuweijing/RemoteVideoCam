@@ -500,7 +500,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         if (detected) {
             emitEvent(
                 ConnectionUtils.createStatus(
-                    MotionDetectionProtocol.KEY,
+                    MotionDetectionProtocol.NAME,
                     MotionDetectionProtocol.DETECTED.name
                 )
             )

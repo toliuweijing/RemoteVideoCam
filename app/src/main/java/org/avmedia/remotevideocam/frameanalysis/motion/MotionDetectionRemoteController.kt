@@ -9,9 +9,10 @@ class MotionDetectionRemoteController(
     private val notificationController = MotionNotificationController(context)
 
     fun subscribe() {
+        CameraStatusEventBus.addSubject(MotionDetectionProtocol.NAME)
         CameraStatusEventBus.subscribe(
             this.javaClass.simpleName,
-            MotionDetectionProtocol.KEY,
+            MotionDetectionProtocol.NAME,
         ) {
             if (MotionDetectionProtocol.DETECTED.name == it) {
                 notificationController.showNotification("Motion Detected", "Details")

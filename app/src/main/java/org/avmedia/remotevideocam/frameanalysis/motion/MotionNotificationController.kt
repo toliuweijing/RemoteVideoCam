@@ -28,7 +28,6 @@ class MotionNotificationController(private val context: Context) {
 
     init {
         createNotificationChannel()
-        showNotification("Detected motion", "Motion is detected at 5:00PM")
     }
 
     private fun createNotificationChannel() {
