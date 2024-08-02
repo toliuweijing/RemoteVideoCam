@@ -15,16 +15,10 @@ import androidx.core.app.NotificationManagerCompat
 import org.avmedia.remotevideocam.R
 
 private const val CHANNEL_MOTION_DETECTED = "motion_detected"
-private const val ID_MOTION_DETECTED = 0
-private val VIBRATION_PATTERN = longArrayOf(1000, 1000, 1000, 1000, 1000)
+private const val ID_MOTION_DETECTED = 1
+private val VIBRATION_PATTERN = longArrayOf(0, 250, 250, 250)
 
 class MotionNotificationController(private val context: Context) {
-
-//    private val notificationUri = Uri.Builder()
-//        .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-//        .authority(context.packageName)
-//        .path(R.raw.ding.toString())
-//        .build()
 
     private val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
@@ -47,8 +41,9 @@ class MotionNotificationController(private val context: Context) {
                 .build()
             val channel = NotificationChannel(CHANNEL_MOTION_DETECTED, name, importance).apply {
                 description = descriptionText
-                setSound(notificationUri, audioAttributes)
                 vibrationPattern = VIBRATION_PATTERN
+                setSound(notificationUri, audioAttributes)
+                enableVibration(true)
             }
             notificationManager.createNotificationChannel(channel)
         }
