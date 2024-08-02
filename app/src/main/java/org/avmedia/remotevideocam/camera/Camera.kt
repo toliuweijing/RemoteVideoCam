@@ -89,25 +89,29 @@ object Camera {
         DisplayToCameraEventBus.subscribe(
             this.javaClass.simpleName,
             { event: JSONObject? ->
-                when (event!!.getString("command")) {
-                    "CONNECTED" -> {
-                        Timber.d("CONNECTED")
-                        ProgressEvents.onNext(ProgressEvents.Events.ConnectionCameraSuccessful)
-                        videoServer.setConnected(true)
-                    }
+                event?.takeIf { it.has("command") }?.let {
+                    when (event.getString("command")) {
+                        "CONNECTED" -> {
+                            Timber.d("CONNECTED")
+                            ProgressEvents.onNext(ProgressEvents.Events.ConnectionCameraSuccessful)
+                            videoServer.setConnected(true)
+                        }
 
-                    "DISCONNECTED" -> {
-                        Timber.d("DISCONNECTED")
-                        ProgressEvents.onNext(ProgressEvents.Events.CameraDisconnected)
-                        videoServer.setConnected(false)
+                        "DISCONNECTED" -> {
+                            Timber.d("DISCONNECTED")
+                            ProgressEvents.onNext(ProgressEvents.Events.CameraDisconnected)
+                            videoServer.setConnected(false)
+                        }
                     }
                 }
-                when (event.getString(MotionDetectionProtocol.NAME)) {
-                    MotionDetectionProtocol.ENABLED.name ->
-                        setMotionDetection(true)
+                event?.takeIf { it.has(MotionDetectionProtocol.NAME) }?.let {
+                    when (event.getString(MotionDetectionProtocol.NAME)) {
+                        MotionDetectionProtocol.ENABLED.name ->
+                            setMotionDetection(true)
 
-                    MotionDetectionProtocol.DISABLED.name ->
-                        setMotionDetection(false)
+                        MotionDetectionProtocol.DISABLED.name ->
+                            setMotionDetection(false)
+                    }
                 }
             },
             { error: Throwable? ->
@@ -121,7 +125,9 @@ object Camera {
                     "command"
                 ) && ("CONNECTED" == commandJsn.getString("command") || "DISCONNECTED" == commandJsn.getString(
                     "command"
-                )) // filter everything else
+                )) ||
+                commandJsn.has(MotionDetectionProtocol.NAME)
+                // filter everything else
             }
         )
     }
