@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.ImageButton
 import org.avmedia.remotevideocam.camera.customcomponents.WebRTCSurfaceView
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionProtocol
 import org.avmedia.remotevideocam.utils.ProgressEvents
 import org.json.JSONException
 import org.json.JSONObject
@@ -16,6 +17,7 @@ object Camera {
     private var connection: ILocalConnection = NetworkServiceConnection()
     private val videoServer: IVideoServer = WebRtcServer()
     private var context: Context? = null
+    private var motionDetectionButton: ImageButton? = null
 
     fun init(
         context: Context?,
@@ -37,10 +39,10 @@ object Camera {
     }
 
     private fun initMotionDetection(motionDetectionButton: ImageButton) {
+        this.motionDetectionButton = motionDetectionButton
         motionDetectionButton.setOnClickListener {
             val enabled = !motionDetectionButton.isSelected
-            motionDetectionButton.isSelected = enabled
-            videoServer.setMotionDetection(enabled)
+            setMotionDetection(enabled)
         }
     }
 
@@ -93,11 +95,19 @@ object Camera {
                         ProgressEvents.onNext(ProgressEvents.Events.ConnectionCameraSuccessful)
                         videoServer.setConnected(true)
                     }
+
                     "DISCONNECTED" -> {
                         Timber.d("DISCONNECTED")
                         ProgressEvents.onNext(ProgressEvents.Events.CameraDisconnected)
                         videoServer.setConnected(false)
                     }
+                }
+                when (event.getString(MotionDetectionProtocol.NAME)) {
+                    MotionDetectionProtocol.ENABLED.name ->
+                        setMotionDetection(true)
+
+                    MotionDetectionProtocol.DISABLED.name ->
+                        setMotionDetection(false)
                 }
             },
             { error: Throwable? ->
@@ -114,5 +124,10 @@ object Camera {
                 )) // filter everything else
             }
         )
+    }
+
+    private fun setMotionDetection(enable: Boolean) {
+        videoServer.setMotionDetection(enable)
+        motionDetectionButton?.isSelected = enable
     }
 }
