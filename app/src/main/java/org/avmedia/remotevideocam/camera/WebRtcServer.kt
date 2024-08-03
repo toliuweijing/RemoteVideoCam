@@ -17,7 +17,7 @@ import io.reactivex.functions.Predicate
 import org.avmedia.remotevideocam.camera.CameraToDisplayEventBus.emitEvent
 import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus.subscribe
 import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus.unsubscribe
-import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionProtocol
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionAction
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionNotificationController
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionProcessor
 import org.avmedia.remotevideocam.utils.ProgressEvents
@@ -500,8 +500,8 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         if (detected) {
             emitEvent(
                 ConnectionUtils.createStatus(
-                    MotionDetectionProtocol.NAME,
-                    MotionDetectionProtocol.DETECTED.name
+                    MotionDetectionAction.NAME,
+                    MotionDetectionAction.DETECTED.name
                 )
             )
         }

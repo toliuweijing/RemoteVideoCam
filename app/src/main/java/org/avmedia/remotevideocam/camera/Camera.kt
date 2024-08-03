@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.ImageButton
 import org.avmedia.remotevideocam.camera.customcomponents.WebRTCSurfaceView
-import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionProtocol
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionAction
 import org.avmedia.remotevideocam.utils.ProgressEvents
 import org.json.JSONException
 import org.json.JSONObject
@@ -104,12 +104,12 @@ object Camera {
                         }
                     }
                 }
-                event?.takeIf { it.has(MotionDetectionProtocol.NAME) }?.let {
-                    when (event.getString(MotionDetectionProtocol.NAME)) {
-                        MotionDetectionProtocol.ENABLED.name ->
+                event?.takeIf { it.has(MotionDetectionAction.NAME) }?.let {
+                    when (event.getString(MotionDetectionAction.NAME)) {
+                        MotionDetectionAction.ENABLED.name ->
                             setMotionDetection(true)
 
-                        MotionDetectionProtocol.DISABLED.name ->
+                        MotionDetectionAction.DISABLED.name ->
                             setMotionDetection(false)
                     }
                 }
@@ -126,7 +126,7 @@ object Camera {
                 ) && ("CONNECTED" == commandJsn.getString("command") || "DISCONNECTED" == commandJsn.getString(
                     "command"
                 )) ||
-                commandJsn.has(MotionDetectionProtocol.NAME)
+                commandJsn.has(MotionDetectionAction.NAME)
                 // filter everything else
             }
         )

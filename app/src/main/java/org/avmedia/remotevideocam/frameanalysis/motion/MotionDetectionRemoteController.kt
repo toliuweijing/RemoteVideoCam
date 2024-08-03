@@ -1,36 +1,57 @@
 package org.avmedia.remotevideocam.frameanalysis.motion
 
-import android.content.Context
-import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus
+import android.widget.ImageButton
 import org.avmedia.remotevideocam.display.CameraStatusEventBus
 import org.avmedia.remotevideocam.display.ILocalConnection
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionStateMachine.*
 import org.json.JSONObject
 
+/**
+ * Represents the remote control of the motion detection feature.
+ * 1. remotely toggle the motion detection in the Camera side.
+ * 2. shows a local notification when motion is detected.
+ */
 class MotionDetectionRemoteController(
-    private val context: Context,
     private val connection: ILocalConnection,
-) {
-    private val notificationController = MotionNotificationController(context)
+) : Listener {
+    private var notificationController: MotionNotificationController? = null
+    private val motionDetectionStateMachine = MotionDetectionStateMachine()
 
-    fun setMotionDetection(enable: Boolean) {
-        val value = if (enable) {
-            MotionDetectionProtocol.ENABLED
-        } else {
-            MotionDetectionProtocol.DISABLED
+    fun init(view: ImageButton) {
+        if (notificationController == null) {
+            notificationController = MotionNotificationController(view.context)
+            subscribe()
         }
-        val jsonString = "{${MotionDetectionProtocol.NAME}: \"$value\"}"
+        motionDetectionStateMachine.listener = this
+    }
+
+    fun toggleMotionDetection(enable: Boolean) {
+        val value = if (enable) {
+            MotionDetectionAction.ENABLED
+        } else {
+            MotionDetectionAction.DISABLED
+        }
+        val jsonString = JSONObject()
+            .put(MotionDetectionAction.NAME, value)
+            .toString()
         connection.sendMessage(jsonString)
     }
 
     fun subscribe() {
-        CameraStatusEventBus.addSubject(MotionDetectionProtocol.NAME)
+        CameraStatusEventBus.addSubject(MotionDetectionAction.NAME)
         CameraStatusEventBus.subscribe(
             this.javaClass.simpleName,
-            MotionDetectionProtocol.NAME,
+            MotionDetectionAction.NAME,
         ) {
-            if (MotionDetectionProtocol.DETECTED.name == it) {
-                notificationController.showNotification("Motion Detected", "Details")
+            it?.toMotionDetectionAction()?.let { action ->
+                motionDetectionStateMachine.update(action)
             }
+        }
+    }
+
+    override fun onStateChanged(old: State, new: State) {
+        if (old == State.NOT_DETECTED && new == State.DETECTED) {
+            notificationController?.showNotification("Motion Detected", "Details")
         }
     }
 }
