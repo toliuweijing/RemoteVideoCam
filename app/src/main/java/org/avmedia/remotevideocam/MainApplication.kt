@@ -9,6 +9,7 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Hook up timber for debug build only
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
         }
