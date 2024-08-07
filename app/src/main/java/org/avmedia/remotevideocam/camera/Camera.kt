@@ -6,6 +6,8 @@ import android.util.Log
 import android.widget.ImageButton
 import org.avmedia.remotevideocam.camera.customcomponents.WebRTCSurfaceView
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionAction
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionData
+import org.avmedia.remotevideocam.frameanalysis.motion.toMotionDetectionData
 import org.avmedia.remotevideocam.utils.ProgressEvents
 import org.json.JSONException
 import org.json.JSONObject
@@ -104,13 +106,20 @@ object Camera {
                         }
                     }
                 }
-                event?.takeIf { it.has(MotionDetectionAction.NAME) }?.let {
-                    when (event.getString(MotionDetectionAction.NAME)) {
-                        MotionDetectionAction.ENABLED.name ->
-                            setMotionDetection(true)
+                event?.takeIf { it.has(MotionDetectionData.KEY) }?.let {
+                    event.getJSONObject(MotionDetectionData.KEY)
+                        .toMotionDetectionData()
+                        .let { data ->
+                        when (data.action) {
+                            MotionDetectionAction.ENABLED ->
+                                setMotionDetection(true)
 
-                        MotionDetectionAction.DISABLED.name ->
-                            setMotionDetection(false)
+                            MotionDetectionAction.DISABLED ->
+                                setMotionDetection(false)
+
+                            MotionDetectionAction.DETECTED ->
+                                throw IllegalStateException("Unexpected action")
+                        }
                     }
                 }
             },
@@ -126,7 +135,7 @@ object Camera {
                 ) && ("CONNECTED" == commandJsn.getString("command") || "DISCONNECTED" == commandJsn.getString(
                     "command"
                 )) ||
-                commandJsn.has(MotionDetectionAction.NAME)
+                commandJsn.has(MotionDetectionData.KEY)
                 // filter everything else
             }
         )

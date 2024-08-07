@@ -4,7 +4,9 @@ import android.widget.ImageButton
 import org.avmedia.remotevideocam.display.CameraStatusEventBus
 import org.avmedia.remotevideocam.display.ILocalConnection
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionStateMachine.*
-import org.json.JSONObject
+import timber.log.Timber
+
+private const val TAG = "MotionDetectionRemoteController"
 
 /**
  * Represents the remote control of the motion detection feature.
@@ -31,26 +33,23 @@ class MotionDetectionRemoteController(
         } else {
             MotionDetectionAction.DISABLED
         }
-        val jsonString = JSONObject()
-            .put(MotionDetectionAction.NAME, value)
-            .toString()
-        connection.sendMessage(jsonString)
+        connection.sendMessage(value.toJsonResponse().toString())
     }
 
     fun subscribe() {
-        CameraStatusEventBus.addSubject(MotionDetectionAction.NAME)
+        CameraStatusEventBus.addSubject(MotionDetectionData.KEY)
         CameraStatusEventBus.subscribe(
             this.javaClass.simpleName,
-            MotionDetectionAction.NAME,
+            MotionDetectionData.KEY,
         ) {
-            it?.toMotionDetectionAction()?.let { action ->
-                motionDetectionStateMachine.update(action)
+            it?.toMotionDetectionData()?.let { data ->
+                motionDetectionStateMachine.process(data)
             }
         }
     }
 
-    override fun onStateChanged(old: State, new: State) {
-        if (old == State.NOT_DETECTED && new == State.DETECTED) {
+    override fun onStateChanged(detected: Boolean) {
+        if (detected) {
             notificationController?.showNotification("Motion Detected", "Details")
         }
     }

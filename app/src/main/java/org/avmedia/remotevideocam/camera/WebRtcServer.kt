@@ -18,8 +18,10 @@ import org.avmedia.remotevideocam.camera.CameraToDisplayEventBus.emitEvent
 import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus.subscribe
 import org.avmedia.remotevideocam.camera.DisplayToCameraEventBus.unsubscribe
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionAction
+import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionData
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionNotificationController
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionProcessor
+import org.avmedia.remotevideocam.frameanalysis.motion.toJsonResponse
 import org.avmedia.remotevideocam.utils.ProgressEvents
 import org.avmedia.remotevideocam.utils.AndGate
 import org.avmedia.remotevideocam.utils.ConnectionUtils
@@ -452,6 +454,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
                             )
                             doAnswer()
                         }
+
                         "answer" -> {
                             val remoteDescr = webRtcEvent.getString("sdp")
                             Timber.i("Got remote description %s", remoteDescr)
@@ -460,6 +463,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
                                 SessionDescription(SessionDescription.Type.ANSWER, remoteDescr)
                             )
                         }
+
                         "candidate" -> {
                             val candidate = IceCandidate(
                                 webRtcEvent.getString("id"),
@@ -471,7 +475,8 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
                     }
                 },
                 Consumer { error: Throwable? ->
-                    Log.d(TAG,
+                    Log.d(
+                        TAG,
                         "Error occurred in handleControllerWebRtcEvents: " + error
                     )
                 },
@@ -497,13 +502,11 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     }
 
     override fun onDetectionResult(detected: Boolean) {
-        if (detected) {
-            emitEvent(
-                ConnectionUtils.createStatus(
-                    MotionDetectionAction.NAME,
-                    MotionDetectionAction.DETECTED.name
-                )
-            )
+        val action = if (detected) {
+            MotionDetectionAction.DETECTED
+        } else {
+            MotionDetectionAction.NOT_DETECTED
         }
+        emitEvent(MotionDetectionData(action).toJsonResponse())
     }
 }

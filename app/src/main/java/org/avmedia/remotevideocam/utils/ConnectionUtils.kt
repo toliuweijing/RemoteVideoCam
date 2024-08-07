@@ -7,13 +7,16 @@ import java.net.NetworkInterface
 import java.util.*
 
 object ConnectionUtils {
+
+    const val STATUS = "status"
+
     fun createStatus(name: String?, value: Boolean): JSONObject {
         return createStatus(name, if (value) "true" else "false")
     }
 
     fun createStatus(name: String?, value: String?): JSONObject {
         try {
-            return JSONObject().put("status", JSONObject().put(name, value))
+            return JSONObject().put(STATUS, JSONObject().put(name, value))
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -22,7 +25,7 @@ object ConnectionUtils {
 
     fun createStatus(name: String?, value: JSONObject): JSONObject {
         try {
-            return JSONObject().put("status", JSONObject().put(name, value.toString()))
+            return JSONObject().put(STATUS, JSONObject().put(name, value.toString()))
         } catch (e: JSONException) {
             e.printStackTrace()
         }
