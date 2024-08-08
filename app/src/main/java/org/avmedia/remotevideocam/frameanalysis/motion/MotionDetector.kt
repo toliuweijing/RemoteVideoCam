@@ -107,7 +107,7 @@ class MotionDetector {
 
     private fun executeImageProcessing(foregroundMat: Mat) =
         trace("executeImageProcessing") {
-            trace("makeBinaryImage") {
+            trace("binarizeImage") {
                 // Create a binary image with a gray scale threshold.
                 Imgproc.threshold(
                     foregroundMat,
@@ -118,7 +118,7 @@ class MotionDetector {
                 )
             }
 
-            trace("noiseReduction") {
+            trace("reduceNoise") {
                 /**
                  * Noise reduction choices
                  * 1. MORPH_OPEN to reduce random noises from the foreground.
