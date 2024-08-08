@@ -19,15 +19,11 @@ import timber.log.Timber
 import java.util.Date
 import java.util.Locale
 
-
-
 private const val CHANNEL_MOTION_DETECTED = "motion_detected"
-private const val ID_MOTION_DETECTED = 1
 private const val SUMMARY_ID = 0
 
 private val VIBRATION_PATTERN = longArrayOf(0, 250, 250, 250)
-//private const val COOLDOWN_MS = 30_000L // 30-second cooldown window before the next notification
-private const val COOLDOWN_MS = 1_000L // 30-second cooldown window before the next notification
+private const val COOLDOWN_MS = 30_000L // 30-second cooldown window before the next notification
 private const val MOTION_DETECTION_NOTIFY_GROUP = "motion_detection_notify_group"
 
 private const val TAG = "MotionNotificationController"
@@ -75,18 +71,19 @@ class MotionNotificationController(private val context: Context) {
             return
         }
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            showToast(title)
-            return
-        }
-        val currentTime = SimpleDateFormat(
+        val simpleDataFormat = SimpleDateFormat(
             "hh:mm:ss",
             Locale.getDefault())
             .format(Date())
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            showToast(title.plus(" at $simpleDataFormat"))
+            return
+        }
         val notification = createCommonBuilder(title)
-            .setContentText("At $currentTime")
+            .setContentText("At $simpleDataFormat")
             .build()
         val summary = createCommonBuilder(title)
             .setGroupSummary(true)
