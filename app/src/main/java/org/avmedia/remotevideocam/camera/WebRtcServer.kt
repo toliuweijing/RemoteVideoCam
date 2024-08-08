@@ -129,9 +129,9 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
 
     override fun setMotionDetection(enabled: Boolean) {
         if (enabled) {
-            motionProcessor?.setMotionListener(this, true)
+            motionProcessor?.setMotionListener(this)
         } else {
-            motionProcessor?.setMotionListener(null, false)
+            motionProcessor?.setMotionListener(null)
         }
     }
 
