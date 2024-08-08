@@ -72,10 +72,10 @@ class MotionDetector {
         val mat = Mat(height, width, CvType.CV_8UC4, byteBuffer)
 
         // Clear the mat with transparent black.
-        Imgproc.rectangle(mat, Rect(0, 0, width, height), SCALAR_TRANSPARENT, -1)
+        Imgproc.rectangle(mat, Rect(0, 0, width, height), SCALAR_TRANSPARENT, Imgproc.FILLED)
 
         // Draw contours with green outlines.
-        Imgproc.drawContours(mat, filtered, -1, SCALAR_GREEN)
+        Imgproc.drawContours(mat, filtered, -1, SCALAR_GREEN, Imgproc.FILLED)
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texId)

@@ -82,7 +82,7 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
         return resultBuffer
     }
 
-    fun setMotionListener(listener: Listener?, renderMotion: Boolean = false) {
+    fun setMotionListener(listener: Listener?, renderMotion: Boolean = true) {
         Timber.tag(TAG).i(
             "setMotionListener, listener %s, renderMotion %s",
             listener,

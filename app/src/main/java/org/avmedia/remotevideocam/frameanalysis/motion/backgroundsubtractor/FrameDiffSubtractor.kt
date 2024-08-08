@@ -51,6 +51,8 @@ class FrameDiffSubtractor : BackgroundSubtractor {
 
     override fun release() {
         lastFrame?.release()
+        lastFrame = null
+
         foreground.release()
     }
 }
