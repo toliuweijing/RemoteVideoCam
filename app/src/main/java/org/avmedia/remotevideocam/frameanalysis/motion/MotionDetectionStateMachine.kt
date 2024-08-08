@@ -25,11 +25,10 @@ class MotionDetectionStateMachine {
 
     private var current: MotionDetectionData? = null
         set(value) {
+            Timber.tag(TAG).d("setCurrent %s", value)
             field = value
             firstDetectedMs = null
         }
-
-    private val isDetected get() = current?.action == MotionDetectionAction.DETECTED
 
     interface Listener {
 
@@ -40,9 +39,9 @@ class MotionDetectionStateMachine {
 
     fun process(response: MotionDetectionData) {
         Timber.tag(TAG).d(
-            "process response, action %s timestamp %s",
+            "process response, action %s current %s",
             response.action,
-            response.timestampMs
+            current?.action
         )
 
         when (response.action) {
