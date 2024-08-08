@@ -2,6 +2,7 @@ package org.avmedia.remotevideocam.frameanalysis.motion
 
 import android.opengl.GLES20
 import androidx.tracing.trace
+import org.avmedia.remotevideocam.frameanalysis.motion.backgroundsubtractor.BackgroundSubtractor
 import org.avmedia.remotevideocam.frameanalysis.motion.backgroundsubtractor.FrameDiffSubtractor
 import org.opencv.android.OpenCVLoader
 import org.opencv.core.CvType
@@ -12,6 +13,7 @@ import org.opencv.core.Scalar
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import org.webrtc.TextureBufferImpl
+import timber.log.Timber
 import java.nio.ByteBuffer
 
 private const val GRAY_SCALE_THRESHOLD = 20.0
@@ -25,11 +27,9 @@ private const val TAG = "MotionDetector"
  * Use OpenCV to detect the motion of two consecutive frames. It finds contours of the foreground
  * image to conclude the motion detection result.
  */
-class MotionDetector {
-
-    private val backgroundSubtractor by lazy {
-        FrameDiffSubtractor()
-    }
+class MotionDetector(
+    private val backgroundSubtractor: BackgroundSubtractor = FrameDiffSubtractor()
+) {
 
     private val morphKernel by lazy {
         Imgproc.getStructuringElement(
@@ -39,12 +39,6 @@ class MotionDetector {
     }
 
     private var byteBufferToTexture: ByteBuffer? = null
-
-    init {
-        check(OpenCVLoader.initLocal()) {
-            "Fail to init OpenCV"
-        }
-    }
 
     fun analyzeMotion(textureBuffer: TextureBufferImpl): List<MatOfPoint> =
         trace("$TAG.analyzeMotion") {
@@ -154,5 +148,14 @@ class MotionDetector {
 
     fun release() {
         backgroundSubtractor.release()
+    }
+
+    companion object {
+        init {
+            Timber.tag(TAG).i("Initialize OpenCV")
+            check(OpenCVLoader.initLocal()) {
+                "Fail to init OpenCV"
+            }
+        }
     }
 }

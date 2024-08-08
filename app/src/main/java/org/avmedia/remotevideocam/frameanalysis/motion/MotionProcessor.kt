@@ -43,7 +43,9 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
 
     private val yuvConverter = YuvConverter()
     private val glDrawer = GlRectDrawer()
-    private val motionDetector = MotionDetector()
+    private val motionDetector by lazy {
+        MotionDetector()
+    }
 
     private var texId: Int? = null
     private var listener: Listener? = null
@@ -82,7 +84,7 @@ class MotionProcessor : VideoProcessorImpl.FrameProcessor {
         return resultBuffer
     }
 
-    fun setMotionListener(listener: Listener?, renderMotion: Boolean = true) {
+    fun setMotionListener(listener: Listener?, renderMotion: Boolean = false) {
         Timber.tag(TAG).i(
             "setMotionListener, listener %s, renderMotion %s",
             listener,

@@ -4,7 +4,6 @@ import androidx.tracing.trace
 import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
-import org.webrtc.TextureBufferImpl
 import org.webrtc.VideoFrame
 
 private const val TAG = "FrameDiffSubtractor"
@@ -25,9 +24,9 @@ class FrameDiffSubtractor : BackgroundSubtractor {
     private var lastFrame: Frame? = null
     private val foreground = Mat()
 
-    override fun apply(textureBufferImpl: TextureBufferImpl): Mat? = trace("$TAG.apply") {
+    override fun apply(buffer: VideoFrame.Buffer): Mat? = trace("$TAG.apply") {
         val frame = trace("toI420") {
-            Frame(textureBufferImpl.toI420())
+            Frame(buffer.toI420())
         }
 
         if (lastFrame == null ||
