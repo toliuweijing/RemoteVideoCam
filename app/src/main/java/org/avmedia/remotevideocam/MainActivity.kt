@@ -91,10 +91,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
         if (!Camera.isConnected()) {
             // Open display first, which waits on 'accept'
-            Display.init(this, binding.videoView, binding.motionDetectionButtonReceiver)
+            Display.init(this, binding.videoView, binding.motionDetectionButton)
             Display.connect(this)
 
-            Camera.init(this, binding.videoWindow, binding.motionDetectionButtonSender)
+            Camera.init(this, binding.videoWindow)
             Camera.connect(this)
         }
     }
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.ACCESS_NETWORK_STATE
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             perms += Manifest.permission.POST_NOTIFICATIONS

@@ -21,8 +21,7 @@ object Display : Fragment() {
         videoView.init()
         CameraDataListener.init(connection)
 
-        motionDetectionRemoteController.init(motionDetectionButton)
-        motionDetectionButton.context
+        motionDetectionRemoteController.init(context)
         motionDetectionButton.setOnClickListener {
             val enabled = !it.isSelected
             it.isSelected = enabled

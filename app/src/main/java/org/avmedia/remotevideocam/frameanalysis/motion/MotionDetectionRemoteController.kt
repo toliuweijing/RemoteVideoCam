@@ -1,6 +1,6 @@
 package org.avmedia.remotevideocam.frameanalysis.motion
 
-import android.widget.ImageButton
+import android.content.Context
 import org.avmedia.remotevideocam.display.CameraStatusEventBus
 import org.avmedia.remotevideocam.display.ILocalConnection
 import org.avmedia.remotevideocam.frameanalysis.motion.MotionDetectionStateMachine.*
@@ -19,9 +19,9 @@ class MotionDetectionRemoteController(
     private var notificationController: MotionNotificationController? = null
     private val motionDetectionStateMachine = MotionDetectionStateMachine()
 
-    fun init(view: ImageButton) {
+    fun init(context: Context) {
         if (notificationController == null) {
-            notificationController = MotionNotificationController(view.context)
+            notificationController = MotionNotificationController(context)
             subscribe()
         }
         motionDetectionStateMachine.listener = this

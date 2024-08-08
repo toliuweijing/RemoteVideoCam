@@ -19,12 +19,10 @@ object Camera {
     private var connection: ILocalConnection = NetworkServiceConnection()
     private val videoServer: IVideoServer = WebRtcServer()
     private var context: Context? = null
-    private var motionDetectionButton: ImageButton? = null
 
     fun init(
         context: Context?,
         view: WebRTCSurfaceView,
-        motionDetectionButton: ImageButton
     ) {
         this.context = context
 
@@ -34,18 +32,8 @@ object Camera {
         videoServer.init(context)
         videoServer.setView(view)
 
-        initMotionDetection(motionDetectionButton)
-
         handleDisplayEvents()
         handleDisplayCommands()
-    }
-
-    private fun initMotionDetection(motionDetectionButton: ImageButton) {
-        this.motionDetectionButton = motionDetectionButton
-        motionDetectionButton.setOnClickListener {
-            val enabled = !motionDetectionButton.isSelected
-            setMotionDetection(enabled)
-        }
     }
 
     internal class DataReceived : IDataReceived {
@@ -117,8 +105,12 @@ object Camera {
                             MotionDetectionAction.DISABLED ->
                                 setMotionDetection(false)
 
-                            MotionDetectionAction.DETECTED ->
-                                throw IllegalStateException("Unexpected action")
+                            MotionDetectionAction.DETECTED,
+                            MotionDetectionAction.NOT_DETECTED ->
+                                Timber.tag(TAG).e(
+                                    "Unexpected motion detection action %s",
+                                    data.action.name
+                                )
                         }
                     }
                 }
@@ -143,6 +135,5 @@ object Camera {
 
     private fun setMotionDetection(enable: Boolean) {
         videoServer.setMotionDetection(enable)
-        motionDetectionButton?.isSelected = enable
     }
 }

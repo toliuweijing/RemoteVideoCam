@@ -82,10 +82,10 @@ class MotionNotificationController(private val context: Context) {
             showToast(title.plus(" at $simpleDataFormat"))
             return
         }
-        val notification = createCommonBuilder(title)
+        val notification = createNotificationBuilder(title)
             .setContentText("At $simpleDataFormat")
             .build()
-        val summary = createCommonBuilder(title)
+        val summary = createNotificationBuilder(title)
             .setGroupSummary(true)
             .build()
 
@@ -93,7 +93,7 @@ class MotionNotificationController(private val context: Context) {
         notificationManagerCompat.notify(SUMMARY_ID, summary)
     }
 
-    private fun createCommonBuilder(title: String) =
+    private fun createNotificationBuilder(title: String) =
         NotificationCompat.Builder(context, CHANNEL_MOTION_DETECTED)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSmallIcon(R.drawable.ic_motion_detection)

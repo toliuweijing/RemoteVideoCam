@@ -454,7 +454,6 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
                             )
                             doAnswer()
                         }
-
                         "answer" -> {
                             val remoteDescr = webRtcEvent.getString("sdp")
                             Timber.i("Got remote description %s", remoteDescr)
@@ -463,7 +462,6 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
                                 SessionDescription(SessionDescription.Type.ANSWER, remoteDescr)
                             )
                         }
-
                         "candidate" -> {
                             val candidate = IceCandidate(
                                 webRtcEvent.getString("id"),
@@ -475,8 +473,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
                     }
                 },
                 Consumer { error: Throwable? ->
-                    Log.d(
-                        TAG,
+                    Log.d(TAG,
                         "Error occurred in handleControllerWebRtcEvents: " + error
                     )
                 },

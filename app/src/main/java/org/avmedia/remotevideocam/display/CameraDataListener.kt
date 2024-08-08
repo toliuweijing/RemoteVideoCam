@@ -24,17 +24,13 @@ object CameraDataListener {
             override fun dataReceived(command: String?) {
 
                 val dataJson = JSONObject(command as String)
-                if (dataJson.has(ConnectionUtils.STATUS)) {
-                    processStatus(dataJson.getJSONObject(ConnectionUtils.STATUS))
+                if (dataJson.has("status")) {
+                    processStatus(dataJson.getJSONObject("status"))
                 }
 
                 if (dataJson.has(MotionDetectionData.KEY)) {
                     processMotionDetection(dataJson.getString(MotionDetectionData.KEY))
                 }
-            }
-
-            private fun processMotionDetection(dataJson: String) {
-                CameraStatusEventBus.emitEvent(MotionDetectionData.KEY, dataJson)
             }
 
             private fun processStatus(statusValues: JSONObject) {
@@ -47,6 +43,10 @@ object CameraDataListener {
                     */
                     CameraStatusEventBus.emitEvent(key, value)
                 }
+            }
+
+            private fun processMotionDetection(dataJson: String) {
+                CameraStatusEventBus.emitEvent(MotionDetectionData.KEY, dataJson)
             }
         }
 
