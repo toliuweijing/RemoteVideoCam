@@ -5,6 +5,7 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -22,6 +23,7 @@ import org.avmedia.remotevideocam.databinding.ActivityMainBinding
 import org.avmedia.remotevideocam.display.Display
 import org.avmedia.remotevideocam.display.Utils.toast
 import org.avmedia.remotevideocam.utils.ProgressEvents
+import org.webrtc.voiceengine.WebRtcAudioUtils
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
@@ -89,6 +91,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     override fun onResume() {
         super.onResume()
 
+
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION)
+        audioManager.isSpeakerphoneOn = true
+        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
+        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
+        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
+
         if (!Camera.isConnected()) {
             // Open display first, which waits on 'accept'
             Display.init(this, binding.videoView, binding.motionDetectionButton)
@@ -145,7 +155,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             perms += Manifest.permission.POST_NOTIFICATIONS

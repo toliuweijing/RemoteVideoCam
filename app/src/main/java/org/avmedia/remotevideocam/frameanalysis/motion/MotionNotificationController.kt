@@ -23,7 +23,7 @@ private const val CHANNEL_MOTION_DETECTED = "motion_detected"
 private const val SUMMARY_ID = 0
 
 private val VIBRATION_PATTERN = longArrayOf(0, 250, 250, 250)
-private const val COOLDOWN_MS = 30_000L // 30-second cooldown window before the next notification
+private const val COOLDOWN_MS = 1_000L // 30-second cooldown window before the next notification
 private const val MOTION_DETECTION_NOTIFY_GROUP = "motion_detection_notify_group"
 
 private const val TAG = "MotionNotificationController"
