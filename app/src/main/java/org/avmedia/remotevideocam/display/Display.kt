@@ -2,6 +2,7 @@ package org.avmedia.remotevideocam.display
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.media.AudioManager
 import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import org.avmedia.remotevideocam.display.customcomponents.VideoViewWebRTC

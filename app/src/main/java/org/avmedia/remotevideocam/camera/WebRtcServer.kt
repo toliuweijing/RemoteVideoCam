@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
 import android.util.Size
@@ -34,6 +35,8 @@ import timber.log.Timber
 import java.util.*
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.Camera1Enumerator
+import org.webrtc.audio.AudioDeviceModule
+import org.webrtc.audio.JavaAudioDeviceModule
 
 
 /*
@@ -91,6 +94,9 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         motionNotificationController = MotionNotificationController(context)
 
         createAppEventsSubscription(context)
+
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.isSpeakerphoneOn = true
     }
 
     override val isRunning: Boolean
@@ -353,10 +359,25 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
             InitializationOptions.builder(context)
                 .createInitializationOptions()
         PeerConnectionFactory.initialize(initializationOptions)
+        val audioDeviceModule = createAudioDeviceModule()
         factory = PeerConnectionFactory.builder()
             .setVideoEncoderFactory(encoderFactory)
             .setVideoDecoderFactory(decoderFactory)
+            .setAudioDeviceModule(audioDeviceModule)
             .createPeerConnectionFactory()
+        audioDeviceModule.release()
+    }
+
+    private fun createAudioDeviceModule(): AudioDeviceModule {
+        return JavaAudioDeviceModule.builder(context)
+//            .setSamplesReadyCallback(saveRecordedAudioToFile)
+            .setUseHardwareAcousticEchoCanceler(false)
+            .setUseHardwareNoiseSuppressor(false)
+//            .setAudioRecordErrorCallback(audioRecordErrorCallback)
+//            .setAudioTrackErrorCallback(audioTrackErrorCallback)
+//            .setAudioRecordStateCallback(audioRecordStateCallback)
+//            .setAudioTrackStateCallback(audioTrackStateCallback)
+            .createAudioDeviceModule();
     }
 
     private fun initializeSurfaceViews() {
