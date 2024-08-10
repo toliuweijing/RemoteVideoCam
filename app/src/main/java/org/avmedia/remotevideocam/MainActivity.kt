@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
     private lateinit var binding: ActivityMainBinding
     private val TAG = "MainActivity"
+    private lateinit var audioManager: AudioManager
 
     init {
         instance = this
@@ -42,6 +43,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        audioManager = applicationContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         try {
             binding = ActivityMainBinding.inflate(layoutInflater)
@@ -85,19 +88,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     @Override
     override fun onPause() {
         super.onPause()
+        audioManager.mode = AudioManager.MODE_NORMAL
     }
 
     @Override
     override fun onResume() {
         super.onResume()
 
-
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION)
         audioManager.isSpeakerphoneOn = true
-        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
-        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
-        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
 
         if (!Camera.isConnected()) {
             // Open display first, which waits on 'accept'

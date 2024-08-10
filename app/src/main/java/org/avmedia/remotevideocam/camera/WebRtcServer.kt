@@ -37,6 +37,7 @@ import org.webrtc.CameraVideoCapturer
 import org.webrtc.Camera1Enumerator
 import org.webrtc.audio.AudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule
+import org.webrtc.voiceengine.WebRtcAudioUtils
 
 
 /*
@@ -173,6 +174,10 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     }
 
     private fun startStreamingVideo() {
+        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
+        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
+        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
+
         mediaStream = factory!!.createLocalMediaStream("ARDAMS")
         mediaStream?.addTrack(videoTrackFromCamera)
         mediaStream?.addTrack(localAudioTrack)
@@ -346,6 +351,14 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         videoTrackFromCamera?.addSink(view)
 
         // create an AudioSource instance
+        createAudioSource()
+    }
+
+    private fun createAudioSource() {
+        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
+        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
+        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
+
         audioSource = factory!!.createAudioSource(audioConstraints)
         localAudioTrack = factory!!.createAudioTrack("101", audioSource)
     }
@@ -370,13 +383,8 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
 
     private fun createAudioDeviceModule(): AudioDeviceModule {
         return JavaAudioDeviceModule.builder(context)
-//            .setSamplesReadyCallback(saveRecordedAudioToFile)
             .setUseHardwareAcousticEchoCanceler(false)
             .setUseHardwareNoiseSuppressor(false)
-//            .setAudioRecordErrorCallback(audioRecordErrorCallback)
-//            .setAudioTrackErrorCallback(audioTrackErrorCallback)
-//            .setAudioRecordStateCallback(audioRecordStateCallback)
-//            .setAudioTrackStateCallback(audioTrackStateCallback)
             .createAudioDeviceModule();
     }
 
