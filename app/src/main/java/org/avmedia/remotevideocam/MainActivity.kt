@@ -5,6 +5,7 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -88,14 +89,21 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     @Override
     override fun onPause() {
         super.onPause()
-        audioManager.mode = AudioManager.MODE_NORMAL
     }
 
     @Override
     override fun onResume() {
         super.onResume()
 
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
         audioManager.isSpeakerphoneOn = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            audioManager.availableCommunicationDevices.firstOrNull {
+                it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+            }?.let {
+                audioManager.setCommunicationDevice(it)
+            }
+        }
 
         if (!Camera.isConnected()) {
             // Open display first, which waits on 'accept'

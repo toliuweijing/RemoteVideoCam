@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
 import android.util.Size
@@ -35,9 +34,6 @@ import timber.log.Timber
 import java.util.*
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.Camera1Enumerator
-import org.webrtc.audio.AudioDeviceModule
-import org.webrtc.audio.JavaAudioDeviceModule
-import org.webrtc.voiceengine.WebRtcAudioUtils
 
 
 /*
@@ -95,9 +91,6 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         motionNotificationController = MotionNotificationController(context)
 
         createAppEventsSubscription(context)
-
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.isSpeakerphoneOn = true
     }
 
     override val isRunning: Boolean
@@ -174,10 +167,6 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     }
 
     private fun startStreamingVideo() {
-        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
-        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
-        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
-
         mediaStream = factory!!.createLocalMediaStream("ARDAMS")
         mediaStream?.addTrack(videoTrackFromCamera)
         mediaStream?.addTrack(localAudioTrack)
@@ -351,14 +340,6 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         videoTrackFromCamera?.addSink(view)
 
         // create an AudioSource instance
-        createAudioSource()
-    }
-
-    private fun createAudioSource() {
-        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
-        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
-        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
-
         audioSource = factory!!.createAudioSource(audioConstraints)
         localAudioTrack = factory!!.createAudioTrack("101", audioSource)
     }
@@ -372,20 +353,10 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
             InitializationOptions.builder(context)
                 .createInitializationOptions()
         PeerConnectionFactory.initialize(initializationOptions)
-        val audioDeviceModule = createAudioDeviceModule()
         factory = PeerConnectionFactory.builder()
             .setVideoEncoderFactory(encoderFactory)
             .setVideoDecoderFactory(decoderFactory)
-            .setAudioDeviceModule(audioDeviceModule)
             .createPeerConnectionFactory()
-        audioDeviceModule.release()
-    }
-
-    private fun createAudioDeviceModule(): AudioDeviceModule {
-        return JavaAudioDeviceModule.builder(context)
-            .setUseHardwareAcousticEchoCanceler(false)
-            .setUseHardwareNoiseSuppressor(false)
-            .createAudioDeviceModule();
     }
 
     private fun initializeSurfaceViews() {
