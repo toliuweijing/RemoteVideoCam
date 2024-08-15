@@ -1,5 +1,6 @@
 package org.avmedia.remotevideocam.camera
 
+import android.opengl.GLES20
 import androidx.tracing.trace
 import org.webrtc.VideoFrame
 import org.webrtc.VideoProcessor
@@ -11,7 +12,9 @@ private const val TAG = "VideoProcessorImpl"
  * A default implementation of VideoProcessor. It is responsible to release the new video frame
  * after the use of the video sink set by the webrtc framework.
  */
-class VideoProcessorImpl(private val frameProcessor: FrameProcessor) : VideoProcessor {
+class VideoProcessorImpl(
+    private val frameProcessors: List<FrameProcessor>
+) : VideoProcessor {
 
     interface FrameProcessor {
 
@@ -27,7 +30,16 @@ class VideoProcessorImpl(private val frameProcessor: FrameProcessor) : VideoProc
     }
 
     override fun onFrameCaptured(videoFrame: VideoFrame) = trace("$TAG.onFrameCaptured") {
-        val frame = frameProcessor.process(videoFrame)
+        var frame = videoFrame;
+
+        frameProcessors.forEach { processor ->
+            frame = processor.process(frame)
+        }
+
+        if (frame != videoFrame) {
+            GLES20.glFlush()
+        }
+
         defaultVideoSink?.onFrame(frame)
 
         // Manually release the new frame. Skip if it is unmodified.
