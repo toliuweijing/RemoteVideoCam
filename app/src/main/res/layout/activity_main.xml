@@ -132,10 +132,11 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/button"
-                app:tint="@color/selector_tint"
-                android:src="@drawable/ic_videocam_off_24"
+                app:tint="@color/white"
+                android:src="@drawable/videocam_toggle"
                 android:layout_margin="5dp"
                 />
+<!--            app:tint="@color/selector_tint"-->
 
             <org.avmedia.remotevideocam.camera.customcomponents.FlipCamera
                 android:id="@+id/ic_flip_camera"

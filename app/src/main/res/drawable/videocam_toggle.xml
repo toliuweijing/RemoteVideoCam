@@ -3,12 +3,12 @@
 
     <item
         android:state_selected="false"
-        android:drawable="@color/white"
+        android:drawable="@drawable/ic_videocam_24"
         />
 
-<!--    <item-->
-<!--        android:state_selected="true"-->
-<!--        android:drawable="@color/green"-->
-<!--        />-->
+    <item
+        android:state_selected="true"
+        android:drawable="@drawable/ic_videocam_off_24"
+        />
 
 </selector>
