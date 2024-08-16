@@ -91,7 +91,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
         if (!Camera.isConnected()) {
             // Open display first, which waits on 'accept'
-            Display.init(this, binding.videoView, binding.motionDetectionButton)
+            Display.init(
+                this,
+                binding.videoView,
+                binding.motionDetectionButton,
+                binding.videoStreamIndicator
+            )
             Display.connect(this)
 
             Camera.init(this, binding.videoWindow)
