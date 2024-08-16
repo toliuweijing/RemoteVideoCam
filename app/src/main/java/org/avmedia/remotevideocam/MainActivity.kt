@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             )
             Display.connect(this)
 
-            Camera.init(this, binding.videoWindow)
+            Camera.init(this, binding.videoWindow, binding.cameraToggle)
             Camera.connect(this)
         }
     }

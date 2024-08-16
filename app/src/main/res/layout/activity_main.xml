@@ -123,7 +123,19 @@
             android:layout_alignParentBottom="true"
             android:background="@drawable/shaded"
             android:orientation="vertical"
+            android:gravity="center_horizontal"
             app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageButton
+                android:id="@+id/camera_toggle"
+                style="@style/IconOnlyButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/button"
+                app:tint="@color/selector_tint"
+                android:src="@drawable/ic_videocam_off_24"
+                android:layout_margin="5dp"
+                />
 
             <org.avmedia.remotevideocam.camera.customcomponents.FlipCamera
                 android:id="@+id/ic_flip_camera"
@@ -258,9 +270,10 @@
             android:layout_alignParentRight="true"
             android:background="@drawable/shaded"
             app:tint="@color/selector_tint"
-            android:src="@drawable/ic_motion_detection"
+            android:src="@drawable/ic_videocam_off_24"
             android:padding="5dp"
             />
+<!--        android:src="@drawable/ic_motion_detection"-->
 
     </org.avmedia.remotevideocam.display.customcomponents.DisplayLayout>
 

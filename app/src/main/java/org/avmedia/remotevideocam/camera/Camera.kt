@@ -23,6 +23,7 @@ object Camera {
     fun init(
         context: Context?,
         view: WebRTCSurfaceView,
+        cameraToggle: ImageButton,
     ) {
         this.context = context
 
@@ -34,6 +35,12 @@ object Camera {
 
         handleDisplayEvents()
         handleDisplayCommands()
+
+        cameraToggle.setOnClickListener {
+            cameraToggle.isSelected = !cameraToggle.isSelected
+            val enable = !cameraToggle.isSelected
+            videoServer.setCameraCapturer(enable)
+        }
     }
 
     internal class DataReceived : IDataReceived {
