@@ -345,14 +345,14 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     }
 
     private fun initializePeerConnectionFactory() {
-        val encoderFactory: VideoEncoderFactory =
-            DefaultVideoEncoderFactory(rootEglBase!!.eglBaseContext, true, true)
-        val decoderFactory: VideoDecoderFactory =
-            DefaultVideoDecoderFactory(rootEglBase!!.eglBaseContext)
         val initializationOptions =
             InitializationOptions.builder(context)
                 .createInitializationOptions()
         PeerConnectionFactory.initialize(initializationOptions)
+        val encoderFactory: VideoEncoderFactory =
+            DefaultVideoEncoderFactory(rootEglBase!!.eglBaseContext, true, true)
+        val decoderFactory: VideoDecoderFactory =
+            DefaultVideoDecoderFactory(rootEglBase!!.eglBaseContext)
         factory = PeerConnectionFactory.builder()
             .setVideoEncoderFactory(encoderFactory)
             .setVideoDecoderFactory(decoderFactory)

@@ -5,6 +5,7 @@ import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.webrtc.VideoFrame
+import timber.log.Timber
 
 private const val TAG = "FrameDiffSubtractor"
 
@@ -25,8 +26,13 @@ class FrameDiffSubtractor : BackgroundSubtractor {
     private val foreground = Mat()
 
     override fun apply(buffer: VideoFrame.Buffer): Mat? = trace("$TAG.apply") {
+        val i420Buffer = buffer.toI420() ?: run {
+            Timber.tag(TAG).e("toI420 returns null, frame %s", buffer.toString())
+            return@trace null
+        }
+
         val frame = trace("toI420") {
-            Frame(buffer.toI420())
+            Frame(i420Buffer)
         }
 
         if (lastFrame == null ||
