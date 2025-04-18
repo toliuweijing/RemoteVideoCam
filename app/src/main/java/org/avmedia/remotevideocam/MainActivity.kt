@@ -5,6 +5,8 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -22,6 +24,7 @@ import org.avmedia.remotevideocam.databinding.ActivityMainBinding
 import org.avmedia.remotevideocam.display.Display
 import org.avmedia.remotevideocam.display.Utils.toast
 import org.avmedia.remotevideocam.utils.ProgressEvents
+import org.webrtc.voiceengine.WebRtcAudioUtils
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
@@ -33,6 +36,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
     private lateinit var binding: ActivityMainBinding
     private val TAG = "MainActivity"
+    private lateinit var audioManager: AudioManager
 
     init {
         instance = this
@@ -40,6 +44,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        audioManager = applicationContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         try {
             binding = ActivityMainBinding.inflate(layoutInflater)
@@ -88,6 +94,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     @Override
     override fun onResume() {
         super.onResume()
+
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+        audioManager.isSpeakerphoneOn = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            audioManager.availableCommunicationDevices.firstOrNull {
+                it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+            }?.let {
+                audioManager.setCommunicationDevice(it)
+            }
+        }
 
         if (!Camera.isConnected()) {
             // Open display first, which waits on 'accept'
@@ -145,7 +161,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             perms += Manifest.permission.POST_NOTIFICATIONS
