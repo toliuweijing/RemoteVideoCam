@@ -73,6 +73,7 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
 
     private var videoCapturer: VideoCapturer? = null
     private var motionProcessor: MotionProcessor? = null
+    private var timestampProcessor: TimestampProcessor? = null
     private var motionNotificationController: MotionNotificationController? = null
 
     // IVideoServer Interface
@@ -115,6 +116,9 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
     override fun setView(view: SurfaceViewRenderer?) {
         this.view = view
         this.view!!.isEnabled = false
+//        this.view?.setEnableHardwareScaler(false)
+        this.view!!.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
+//        this.view!!.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL)
         andGate?.set("view set", true)
     }
 
@@ -319,7 +323,11 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
             this.motionProcessor?.release()
             this.motionProcessor = it
         }
-        val videoProcessor = VideoProcessorImpl(motionProcessor)
+        val timestampProcessor = TimestampProcessor().also {
+            this.timestampProcessor?.release()
+            this.timestampProcessor = it
+        }
+        val videoProcessor = VideoProcessorImpl(listOf(motionProcessor, timestampProcessor))
         videoSource.setVideoProcessor(videoProcessor)
 
         surfaceTextureHelper =
