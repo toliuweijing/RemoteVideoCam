@@ -118,6 +118,19 @@ class WebRtcServer : IVideoServer, MotionProcessor.Listener {
         andGate?.set("view set", true)
     }
 
+    override fun setCameraCapturer(enabled: Boolean) {
+        Timber.tag(TAG).d("setCamera ")
+        if (enabled) {
+            videoCapturer?.startCapture(
+                VIDEO_RESOLUTION_WIDTH,
+                VIDEO_RESOLUTION_HEIGHT,
+                FPS,
+            )
+        } else {
+            videoCapturer?.stopCapture()
+        }
+    }
+
     override fun setConnected(connected: Boolean) {
         andGate?.set("connected", connected)
     }

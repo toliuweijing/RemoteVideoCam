@@ -11,6 +11,7 @@ package org.avmedia.remotevideocam.display.customcomponents
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.SystemClock
 import android.util.AttributeSet
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -33,6 +34,9 @@ class VideoViewWebRTC @JvmOverloads constructor(
     private var factory: PeerConnectionFactory? = null
     private val connection: ILocalConnection = NetworkServiceConnection
     private var mirrorState = false
+
+    var videoFrameSystemClockMs: Long = -1
+        private set
 
     companion object {
         private const val TAG = "VideoViewWebRTC"
@@ -63,6 +67,11 @@ class VideoViewWebRTC @JvmOverloads constructor(
         createAppEventsSubscription()
 
         rootEglBase = EglBase.create()
+    }
+
+    override fun onFrame(frame: VideoFrame) {
+        super.onFrame(frame)
+        videoFrameSystemClockMs = SystemClock.elapsedRealtime()
     }
 
     private fun processVideoCommand(command: String) {
